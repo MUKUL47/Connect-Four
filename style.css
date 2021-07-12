@@ -31,6 +31,7 @@
   height: 50px;
   border-radius: 100%;
   gap: 2.5rem;
+  cursor: pointer;
 }
 .bg-area {
   padding: 10px;
