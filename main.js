@@ -1,6 +1,8 @@
 "use strict";
 const ConnectFour = (() => {
   const overlayOpacity = 45;
+  const row = 7;
+  const column = 6;
   const winnerCoordinatesStyle = "2px solid";
   const keyCode = { leftButton: 37, rightButton: 39, space: 32 };
   const rowMap = { 0: 30, 1: 110, 2: 190, 3: 270, 4: 350, 5: 430, 6: 510 };
@@ -29,8 +31,8 @@ const ConnectFour = (() => {
     ];
   }
   function initalizeNodes() {
-    for (let i = 0; i < 6; i++) {
-      for (let j = 0; j < 7; j++) {
+    for (let i = 0; i < column; i++) {
+      for (let j = 0; j < row; j++) {
         const node = document.createElement("div");
         node.className = "node";
         node.id = `${j}${i}`;
@@ -113,10 +115,8 @@ const ConnectFour = (() => {
   function checkWinner(player) {
     if (!Array.isArray(lastActivePosition)) return;
     const [x, y] = lastActivePosition;
-    let count = 0;
-    for (let x = 0; x < 7; x++) count = checkXYAxis(x, y, player, count);
-    count = 0;
-    for (let y = 0; y < 6; y++) count = checkXYAxis(x, y, player, count);
+    checkXYAxis(x, y, player, true);
+    checkXYAxis(x, y, player, false);
     const [topLeftX, topLeftY] = getInitalHorizontalCoordinate(
       "TOP_LEFT",
       Number(x),
@@ -137,8 +137,8 @@ const ConnectFour = (() => {
     let matchedCoordinates = [];
     while (1) {
       if (
-        y >= 6 ||
-        (x >= 7 && !topRight_bottom) ||
+        y >= column ||
+        (x >= row && !topRight_bottom) ||
         (x < 0 && topRight_bottom)
       ) {
         break;
@@ -169,7 +169,7 @@ const ConnectFour = (() => {
       });
     }
     setTimeout(() => {
-      alert(`Player ${player + 1} won !!!`);
+      alert(`Player ${player + 1} won !`);
       setTimeout(() => {
         reset();
       });
@@ -188,8 +188,8 @@ const ConnectFour = (() => {
       }
       return [x, y];
     } else if (coordinate === "TOP_RIGHT") {
-      while (x < 7 && y >= 0) {
-        if (x + 1 < 7 && y - 1 >= 0) {
+      while (x < row && y >= 0) {
+        if (x + 1 < row && y - 1 >= 0) {
           x++;
           y--;
         } else {
@@ -200,14 +200,27 @@ const ConnectFour = (() => {
     }
   }
 
-  function checkXYAxis(x, y, player, count) {
-    const hasMatch = `${nodes[x][y]}` == player;
-    if (hasMatch) {
-      if (++count === 4) someoneWon(player);
-      return count;
+  function checkXYAxis(x1, y1, player, xAxis) {
+    let count = 0;
+    let matchedCoordinates = [];
+    const checkCondition = (hasMatch, xCoord, yCoord, coordinates) => {
+      if (hasMatch) {
+        matchedCoordinates.push({ x: xCoord, y: yCoord });
+        if (++count === 4) someoneWon(player, coordinates);
+      } else {
+        matchedCoordinates = [];
+        count = 0;
+      }
+    };
+    if (!xAxis) {
+      for (let y = 0; y < column; y++) {
+        checkCondition(`${nodes[x1][y]}` == player, x1, y, matchedCoordinates);
+      }
+    } else {
+      for (let x = 0; x < row; x++) {
+        checkCondition(`${nodes[x][y1]}` == player, x, y1, matchedCoordinates);
+      }
     }
-    count = 0;
-    return 0;
   }
 
   function moveNodeTarget(isLeft) {
@@ -224,8 +237,8 @@ const ConnectFour = (() => {
     lastTargetOverlay = false;
     lastActivePosition = [];
     nodes = getDefaultNodes();
-    for (let i = 0; i < 6; i++) {
-      for (let j = 0; j < 7; j++) {
+    for (let i = 0; i < column; i++) {
+      for (let j = 0; j < row; j++) {
         const element = document.getElementById(`${j}${i}`);
         element.style.background = defaultNodeColor;
         element.style.outline = "none";
